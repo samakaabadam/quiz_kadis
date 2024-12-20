@@ -301,7 +301,7 @@ function showResults() {
         // Display incorrect answers
         incorrectAnswers.forEach(answer => {
             const li = document.createElement('li');
-            li.textContent = `S=(${answer.question} ), (Jiwabtada: ${answer.userAnswer}❌), ( Tan saxan: ${answer.correctAnswer})✔️`;
+            li.textContent=`S=(${answer.question} ), (Jiwabtada: ${answer.userAnswer}❌)( Saxda:${answer.correctAnswer})✔️`;
             incorrectList.appendChild(li);
         });
     }
