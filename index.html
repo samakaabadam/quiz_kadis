@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom right, #6a11cb, #2575fc); /* Gradient background */
+            color: #fff;
+        }
+    
+        .container {
+            max-width: 600px;
+            width: 90%;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9); /* Soft white with transparency */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            text-align: center;
+            color: #333; /* Text color for contrast inside the container */
+        }
+    
+        select, button, input {
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+    
+        button {
+            background: linear-gradient(to right, #ff7e5f, #feb47b); /* Gradient button */
+            color: #fff;
+            cursor: pointer;
+        }
+    
+        button:hover {
+            background: linear-gradient(to right, #feb47b, #ff7e5f); /* Reverse gradient on hover */
+        }
+    
+        .question {
+            margin: 20px 0;
+            font-size: 18px;
+        }
+    
+        .options {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    
+        .options button {
+            margin: 5px 0;
+            padding: 10px;
+            width: 100%;
+            font-size: 16px;
+            box-sizing: border-box;
+            border: none;
+            border-radius: 5px;
+        }
+    
+        .results {
+            display: none;
+        }
+    
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+    
+            .container {
+                width: 100%;
+                padding: 15px;
+            }
+    
+            .question {
+                font-size: 16px;
+            }
+    
+            select, button, input {
+                font-size: 14px;
+            }
+    
+            .options button {
+                font-size: 14px;
+            }
+        }
+    
+        @media (max-width: 480px) {
+            .question {
+                font-size: 14px;
+            }
+    
+            select, button, input {
+                font-size: 12px;
+            }
+    
+            .options button {
+                font-size: 12px;
+            }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <div id="start">
+            <h1>Math Quiz | Kadis</h1>
+            <label for="mathType">Dooro nuuca Xisaabta:</label>
+            <select id="mathType">
+                <option value="addition">Addition  \ Kudaris</option>
+                <option value="subtraction">Subtraction  \ Kajaris</option>
+                <option value="multiplication">Multiplication \ Ku dhifasho</option>
+                <option value="division">Division \ U qaybin</option>
+                <option value="algebra">Algebra \ isku dhafan</option>
+            </select>
+            <label for="questionCount">Dooro tirada Su,aalaha:</label>
+            <select id="questionCount">
+                <option value="10">10: Su,aalood</option>
+                <option value="20">20: Su,aalood</option>
+                <option value="30">30: Su,aalood</option>
+                <option value="40">40: Su,aalood</option>
+                <option value="50">50: Su,aalood</option>
+                <option value="60">60: Su,aalood</option>
+                <option value="70">70: Su,aalood</option>
+                <option value="80">80: Su,aalood</option>
+                <option value="90">90: Su,aalood</option>
+                <option value="100">100: Su,aalood</option>
+            </select>
+            <label for="inputMode">Mid ka dooro:</label>
+            <select id="inputMode">
+                <option value="choice">Kala doorasho</option>
+                <option value="input">inaad adigu qorto jiwaabaha</option>
+            </select>
+            <button onclick="startQuiz()">Billow shaqada</button>
+        </div>
+
+        <div id="quiz" style="display: none;">
+            <div class="question" id="question"></div>
+            <div class="options" id="options"></div>
+        </div>
+
+        <div id="results" class="results">
+            <h2>Quiz Results</h2>
+            <p>Su,aalahu waa: <span id="totalQuestions"></span></p>
+            <p>Intaad saxday waa: <span id="correctAnswers"></span></p>
+            <p>Intaad qaladay waa: <span id="incorrectAnswers"></span></p>
+            <p>Tirada guud ee dhibcaha: <span id="totalMarks"></span></p>
+            <p>Celceliska dhibcaha: <span id="averageMarks"></span>%</p>
+            <p>Heerka Darajada: <span id="grade"></span></p>
+            <h3>In taad qaladay:</h3>
+            <ul id="incorrectAnswersList"></ul> <!-- List for incorrect answers -->
+            <button onclick="location.reload()">is day mar kale</button>
+        </div>
+    </div>
+
+    <script>
+        let totalQuestions;
+let currentQuestions = [];
+let currentIndex = 0;
+let correctCount = 0;
+let totalMarks = 0;
+let inputMode;
+let incorrectAnswers = []; // Store incorrect answers
+
+function startQuiz() {
+    const mathType = document.getElementById('mathType').value;
+    totalQuestions = parseInt(document.getElementById('questionCount').value);
+    inputMode = document.getElementById('inputMode').value;
+    generateQuestions(mathType);
+    document.getElementById('start').style.display = 'none';
+    document.getElementById('quiz').style.display = 'block';
+    showQuestion();
+}
+
+function generateQuestions(type) {
+    currentQuestions = [];
+    for (let i = 0; i < totalQuestions; i++) {
+        let question = {};
+        let num1 = Math.floor(Math.random() * 10) + 1;
+        let num2 = Math.floor(Math.random() * 10) + 1;
+
+        if (type === 'addition') {
+            question.text = `${num1} + ${num2}`;
+            question.answer = num1 + num2;
+        } else if (type === 'subtraction') {
+            question.text = `${num1} - ${num2}`;
+            question.answer = num1 - num2;
+        } else if (type === 'multiplication') {
+            question.text = `${num1} × ${num2}`;
+            question.answer = num1 * num2;
+        } else if (type === 'division') {
+            question.text = `${num1 * num2} ÷ ${num1}`;
+            question.answer = num2;
+        } else if (type === 'algebra') {
+            question.text = `Solve for x: ${num1}x = ${num1 * num2}`;
+            question.answer = num2;
+        }
+
+        question.options = shuffleOptions([question.answer, num1, num2, num1 + num2]);
+        currentQuestions.push(question);
+    }
+}
+
+function shuffleOptions(options) {
+    for (let i = options.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [options[i], options[j]] = [options[j], options[i]];
+    }
+    return options;
+}
+
+function showQuestion() {
+    const question = currentQuestions[currentIndex];
+    document.getElementById('question').textContent = question.text;
+
+    const optionsContainer = document.getElementById('options');
+    optionsContainer.innerHTML = '';
+
+    if (inputMode === 'choice') {
+        question.options.forEach(option => {
+            const button = document.createElement('button');
+            button.textContent = option;
+            button.onclick = () => checkAnswer(option);
+            optionsContainer.appendChild(button);
+        });
+    } else if (inputMode === 'input') {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.id = 'userAnswer';
+        optionsContainer.appendChild(input);
+
+        const submitButton = document.createElement('button');
+        submitButton.textContent = 'Submit';
+        submitButton.onclick = () => {
+            const userAnswer = parseInt(document.getElementById('userAnswer').value);
+            checkAnswer(userAnswer);
+        };
+        optionsContainer.appendChild(submitButton);
+    }
+}
+
+function checkAnswer(userAnswer) {
+    const correctAnswer = currentQuestions[currentIndex].answer;
+
+    if (userAnswer === correctAnswer) {
+        correctCount++;
+        totalMarks += 100; // Increment total marks by 100 for correct answers
+    } else {
+        incorrectAnswers.push({
+            question: currentQuestions[currentIndex].text,
+            userAnswer: userAnswer,
+            correctAnswer: correctAnswer
+        });
+    }
+
+    currentIndex++;
+
+    if (currentIndex < totalQuestions) {
+        showQuestion();
+    } else {
+        showResults();
+    }
+}
+
+function showResults() {
+    document.getElementById('quiz').style.display = 'none';
+    document.getElementById('results').style.display = 'block';
+
+    document.getElementById('totalQuestions').textContent = totalQuestions;
+    document.getElementById('correctAnswers').textContent = correctCount;
+    document.getElementById('incorrectAnswers').textContent = totalQuestions - correctCount;
+    document.getElementById('totalMarks').textContent = totalMarks;
+    document.getElementById('averageMarks').textContent = ((correctCount / totalQuestions) * 100).toFixed(2);
+    document.getElementById('grade').textContent = getGrade((correctCount / totalQuestions) * 100);
+
+    // Display incorrect answers with chosen value and correct value
+    const incorrectList = document.getElementById('incorrectAnswersList');
+    incorrectList.innerHTML = ''; // Clear previous list if any
+
+    if (incorrectAnswers.length === 0) {
+        // Display the word "Majiro" if no incorrect answers
+        const majiroMessage = document.createElement('p');
+        majiroMessage.textContent = 'Majiro'; // Word to display when all answers are correct
+        majiroMessage.style.color = 'green'; // Optional: Set text color
+        incorrectList.appendChild(majiroMessage);
+    } else {
+        // Display incorrect answers
+        incorrectAnswers.forEach(answer => {
+            const li = document.createElement('li');
+            li.textContent = `S=(${answer.question} ), (Jiwabtada: ${answer.userAnswer}❌), ( Tan saxan: ${answer.correctAnswer})✔️`;
+            incorrectList.appendChild(li);
+        });
+    }
+}
+
+
+function getGrade(percentage) {
+    if (percentage >= 95) return 'A+';
+    if (percentage >= 90) return 'A';
+    if (percentage >= 87) return 'A-';
+    if (percentage >= 85) return 'B+';
+    if (percentage >= 80) return 'B';
+    if (percentage >= 75) return 'B-';
+    if (percentage >= 70) return 'C+';
+    if (percentage >= 65) return 'C';
+    if (percentage >= 60) return 'C-';
+    if (percentage >= 57) return 'D+';
+    if (percentage >= 55) return 'D';
+    if (percentage >= 50) return 'D-';
+    return 'F';
+}
+
+    </script>
+</body>
+
+</html>
